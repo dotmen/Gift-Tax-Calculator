@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 금액에 콤마 추가
     const formatNumber = (num) => num.toLocaleString('ko-KR');
     const parseNumber = (str) => parseInt(str.replace(/,/g, ''), 10) || 0;
 
@@ -9,9 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.value = formatNumber(value);
     });
 
-    // "과거 증여 금액 추가" 버튼 클릭 이벤트
+    // 과거 증여 금액 추가 버튼 클릭
     document.getElementById('addGiftButton').addEventListener('click', () => {
         const container = document.getElementById('pastGiftsContainer');
+
+        // 숨겨진 과거 증여 금액 입력 필드 보이기
+        container.style.display = 'block';
 
         // 새 입력 필드 생성
         const newInput = document.createElement('input');
@@ -19,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         newInput.className = 'pastGift';
         newInput.placeholder = '예: 10,000,000';
 
-        // 콤마 처리 이벤트 추가
+        // 콤마 처리 추가
         newInput.addEventListener('input', (e) => {
             const value = parseNumber(e.target.value);
             e.target.value = formatNumber(value);
@@ -29,10 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
         container.insertBefore(newInput, container.firstChild);
     });
 
-    // "계산하기" 버튼 클릭 이벤트
+    // 계산 버튼 클릭
     document.getElementById('calculateButton').addEventListener('click', () => {
         const giftAmount = parseNumber(document.getElementById('giftAmount').value);
         const relationship = document.getElementById('relationship').value;
+        const assetType = document.getElementById('assetType').value;
 
         // 과거 증여 금액 합산
         const pastGifts = Array.from(document.querySelectorAll('.pastGift'))
@@ -53,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 과세 표준 계산
         const taxableAmount = totalGift - exemption;
 
-        // 세율에 따른 증여세 계산
+        // 증여세 계산
         let tax = 0;
         if (taxableAmount > 0) {
             if (taxableAmount <= 100000000) tax = taxableAmount * 0.1;
@@ -63,11 +66,21 @@ document.addEventListener('DOMContentLoaded', () => {
             else tax = taxableAmount * 0.5 - 460000000;
         }
 
+        // 취득세 계산 (예시: 부동산 3%, 주식 1%)
+        let acquisitionTax = 0;
+        if (assetType === '부동산') acquisitionTax = giftAmount * 0.03;
+        else if (assetType === '주식') acquisitionTax = giftAmount * 0.01;
+
+        // 부가세 계산 (취득세의 10%)
+        const additionalTax = acquisitionTax * 0.1;
+
         // 결과 출력
         document.getElementById('result').innerHTML = `
             총 증여 금액: ${formatNumber(totalGift)}원<br>
             과세 표준: ${formatNumber(taxableAmount)}원<br>
-            계산된 증여세: ${formatNumber(tax)}원
+            계산된 증여세: ${formatNumber(tax)}원<br>
+            취득세: ${formatNumber(acquisitionTax)}원<br>
+            부가세: ${formatNumber(additionalTax)}원
         `;
     });
 });
