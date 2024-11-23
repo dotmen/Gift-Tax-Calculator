@@ -4,34 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>증여세 계산기</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        input, select {
-            margin: 10px 0;
-            padding: 5px;
-            width: 200px;
-        }
-        button {
-            padding: 5px 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #results {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            background-color: #f9f9f9;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css"> <!-- CSS 연결 -->
 </head>
 <body>
     <h1>증여세 계산기 (2024년 기준)</h1>
@@ -56,38 +29,6 @@
         <p>지방교육세: <span id="localEducationTax">0</span> 원</p>
         <p>최종 납부세액: <span id="totalTax">0</span> 원</p>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const cashInput = document.getElementById('cashInput');
-            const cashAmount = document.getElementById('cashAmount');
-            const calculateButton = document.getElementById('calculate');
-            const giftTaxElement = document.getElementById('giftTax');
-
-            function formatNumberWithCommas(value) {
-                if (isNaN(value)) return value;
-                return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            }
-
-            function removeCommas(value) {
-                return value.replace(/,/g, '');
-            }
-
-            calculateButton.addEventListener('click', () => {
-                const cashValue = parseFloat(removeCommas(cashAmount.value));
-                if (isNaN(cashValue)) {
-                    alert('금액을 정확히 입력해주세요.');
-                    return;
-                }
-                const giftTax = cashValue * 0.1; // 10% 세율 예제
-                giftTaxElement.textContent = formatNumberWithCommas(giftTax.toFixed(0));
-                document.getElementById('results').classList.remove('hidden');
-            });
-
-            cashAmount.addEventListener('input', () => {
-                const unformattedValue = removeCommas(cashAmount.value);
-                cashAmount.value = formatNumberWithCommas(unformattedValue);
-            });
-        });
-    </script>
+    <script src="script.js"></script> <!-- JS 연결 -->
 </body>
 </html>
