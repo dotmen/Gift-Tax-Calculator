@@ -35,7 +35,7 @@ input, select, button {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
-    box-sizing: border-box; /* 끝선 정렬 보장 */
+    box-sizing: border-box;
 }
 
 button {
