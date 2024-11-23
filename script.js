@@ -8,14 +8,12 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.value = formatNumber(value);
     });
 
-    // 과거 증여 금액 추가 버튼 클릭
+    // 과거 증여 금액 추가 버튼
     document.getElementById('addGiftButton').addEventListener('click', () => {
         const container = document.getElementById('pastGiftsContainer');
+        container.style.display = 'block'; // 숨겨진 입력 필드를 표시
 
-        // 숨겨진 과거 증여 금액 입력 필드 보이기
-        container.style.display = 'block';
-
-        // 새 입력 필드 생성
+        // 새 입력 필드 추가
         const newInput = document.createElement('input');
         newInput.type = 'text';
         newInput.className = 'pastGift';
@@ -27,8 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.value = formatNumber(value);
         });
 
-        // 새 입력 필드를 위로 추가
-        container.insertBefore(newInput, container.firstChild);
+        container.appendChild(newInput);
     });
 
     // 계산 버튼 클릭
@@ -36,6 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const giftAmount = parseNumber(document.getElementById('giftAmount').value);
         const relationship = document.getElementById('relationship').value;
         const assetType = document.getElementById('assetType').value;
+        const giftDate = new Date(document.getElementById('giftDate').value);
+        const reportDate = new Date(document.getElementById('reportDate').value);
 
         // 과거 증여 금액 합산
         const pastGifts = Array.from(document.querySelectorAll('.pastGift'))
@@ -66,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else tax = taxableAmount * 0.5 - 460000000;
         }
 
-        // 취득세 계산 (예시: 부동산 3%, 주식 1%)
+        // 취득세 계산
         let acquisitionTax = 0;
         if (assetType === '부동산') acquisitionTax = giftAmount * 0.03;
         else if (assetType === '주식') acquisitionTax = giftAmount * 0.01;
@@ -74,13 +73,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // 부가세 계산 (취득세의 10%)
         const additionalTax = acquisitionTax * 0.1;
 
+        // 과태료 계산 (신고일 지연 시)
+        const delayInDays = Math.floor((reportDate - giftDate) / (1000 * 60 * 60 * 24));
+        const lateFee = delayInDays > 90 ? tax * 0.01 * Math.ceil(delayInDays / 30) : 0;
+
         // 결과 출력
         document.getElementById('result').innerHTML = `
             총 증여 금액: ${formatNumber(totalGift)}원<br>
             과세 표준: ${formatNumber(taxableAmount)}원<br>
             계산된 증여세: ${formatNumber(tax)}원<br>
             취득세: ${formatNumber(acquisitionTax)}원<br>
-            부가세: ${formatNumber(additionalTax)}원
+            부가세: ${formatNumber(additionalTax)}원<br>
+            과태료: ${formatNumber(lateFee)}원
         `;
     });
 });
