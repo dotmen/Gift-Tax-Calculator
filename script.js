@@ -1,14 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    const parseNumber = (str) => parseFloat(str.replace(/,/g, ''));
+    // 금액에 콤마 추가
+    const formatNumber = (num) => num.toLocaleString('ko-KR');
+    const parseNumber = (str) => parseInt(str.replace(/,/g, ''), 10) || 0;
 
     // 금액 입력 시 콤마 처리
     document.getElementById('giftAmount').addEventListener('input', (e) => {
-        const value = parseNumber(e.target.value) || '';
-        e.target.value = value ? formatNumber(value) : '';
+        const value = parseNumber(e.target.value);
+        e.target.value = formatNumber(value);
     });
 
-    // 과거 증여 금액 추가 버튼 클릭 이벤트
+    // "과거 증여 금액 추가" 버튼 클릭 이벤트
     document.getElementById('addGiftButton').addEventListener('click', () => {
         const container = document.getElementById('pastGiftsContainer');
 
@@ -20,22 +21,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 콤마 처리 이벤트 추가
         newInput.addEventListener('input', (e) => {
-            const value = parseNumber(e.target.value) || '';
-            e.target.value = value ? formatNumber(value) : '';
+            const value = parseNumber(e.target.value);
+            e.target.value = formatNumber(value);
         });
 
-        // 입력 필드를 컨테이너의 첫 번째 자식으로 추가 (위에 추가)
+        // 새 입력 필드를 위로 추가
         container.insertBefore(newInput, container.firstChild);
     });
 
-    // 계산 버튼 클릭 이벤트
+    // "계산하기" 버튼 클릭 이벤트
     document.getElementById('calculateButton').addEventListener('click', () => {
-        const giftAmount = parseNumber(document.getElementById('giftAmount').value) || 0;
+        const giftAmount = parseNumber(document.getElementById('giftAmount').value);
         const relationship = document.getElementById('relationship').value;
 
         // 과거 증여 금액 합산
-        const pastGifts = [...document.querySelectorAll('.pastGift')]
-            .map(input => parseNumber(input.value) || 0)
+        const pastGifts = Array.from(document.querySelectorAll('.pastGift'))
+            .map(input => parseNumber(input.value))
             .reduce((sum, val) => sum + val, 0);
 
         // 공제 한도 설정
