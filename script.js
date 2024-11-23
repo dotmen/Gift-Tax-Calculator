@@ -12,15 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const localEducationTaxElement = document.getElementById('localEducationTax');
     const totalTaxElement = document.getElementById('totalTax');
 
-    // 콤마 제거 함수
-    function removeCommas(value) {
-        return value.replace(/,/g, '');
+    // 콤마 추가 및 제거 함수
+    function formatNumberWithCommas(value) {
+        if (isNaN(value)) return value;
+        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
 
-    // 콤마 추가 함수
-    function formatNumberWithCommas(value) {
-        if (isNaN(value)) return value; // 숫자가 아니면 그대로 반환
-        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    function removeCommas(value) {
+        return value.replace(/,/g, '');
     }
 
     // 숫자 입력 시 콤마 적용
@@ -28,35 +27,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const input = document.getElementById(inputId);
         input.addEventListener('input', () => {
             const cursorPosition = input.selectionStart;
-            const unformattedValue = removeCommas(input.value); // 콤마 제거
-            if (!isNaN(unformattedValue)) {
-                const formattedValue = formatNumberWithCommas(unformattedValue); // 콤마 추가
-                input.value = formattedValue;
+            const unformattedValue = removeCommas(input.value);
+            const formattedValue = formatNumberWithCommas(unformattedValue);
+            input.value = formattedValue;
 
-                // 커서 위치 유지
-                input.selectionStart = input.selectionEnd = cursorPosition + (formattedValue.length - unformattedValue.length);
-            }
+            // 커서 위치 유지
+            input.selectionStart = input.selectionEnd = cursorPosition + (formattedValue.length - unformattedValue.length);
         });
     }
 
-    // 자산 유형 변경 시 입력 필드 표시
+    // 자산 유형 변경 시 필드 표시/숨기기
     assetType.addEventListener('change', () => {
-        document.getElementById('cashInput').classList.add('hidden');
-        document.getElementById('realEstateInput').classList.add('hidden');
-        document.getElementById('stockInput').classList.add('hidden');
+        const selectedType = assetType.value;
+        document.querySelectorAll('.asset-input').forEach((el) => el.classList.add('hidden'));
 
-        if (assetType.value === 'cash') {
-            document.getElementById('cashInput').classList.remove('hidden');
-        } else if (assetType.value === 'realEstate') {
-            document.getElementById('realEstateInput').classList.remove('hidden');
-        } else if (assetType.value === 'stocks') {
-            document.getElementById('stockInput').classList.remove('hidden');
+        if (selectedType === 'cash') {
+            cashInput.parentElement.classList.remove('hidden');
+        } else if (selectedType === 'realEstate') {
+            realEstateInput.parentElement.classList.remove('hidden');
+        } else if (selectedType === 'stocks') {
+            stockInput.parentElement.classList.remove('hidden');
         }
     });
 
-    // 증여세 계산
+    // 계산 버튼 클릭 시
     calculateButton.addEventListener('click', () => {
-        // 입력값 가져오기
         const assetValue = parseFloat(
             removeCommas(
                 assetType.value === 'cash'
@@ -66,6 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     : stockInput.value
             )
         );
+
+        if (isNaN(assetValue)) {
+            alert('자산 금액을 올바르게 입력해주세요.');
+            return;
+        }
 
         const relationship = document.getElementById('relationship').value;
         const giftDate = new Date(document.getElementById('giftDate').value);
@@ -81,17 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const taxableAmount = Math.max(assetValue - exemptionLimit, 0);
 
-        // 증여세율 계산 (누진세율 적용)
+        // 증여세율 계산 (누진세율)
         let giftTax = 0;
-        if (taxableAmount <= 100000000) {
-            giftTax = taxableAmount * 0.1;
-        } else if (taxableAmount <= 500000000) {
-            giftTax = 10000000 + (taxableAmount - 100000000) * 0.2;
-        } else if (taxableAmount <= 1000000000) {
-            giftTax = 90000000 + (taxableAmount - 500000000) * 0.3;
-        } else {
-            giftTax = 240000000 + (taxableAmount - 1000000000) * 0.5;
-        }
+        if (taxableAmount <= 100000000) giftTax = taxableAmount * 0.1;
+        else if (taxableAmount <= 500000000) giftTax = 10000000 + (taxableAmount - 100000000) * 0.2;
+        else if (taxableAmount <= 1000000000) giftTax = 90000000 + (taxableAmount - 500000000) * 0.3;
+        else giftTax = 240000000 + (taxableAmount - 1000000000) * 0.5;
 
         // 가산세 계산
         let penaltyTax = 0;
@@ -109,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localEducationTax = acquisitionTax * 0.1; // 지방교육세 10%
         }
 
-        // 최종 세금 합계
+        // 총 세액 계산
         const totalTax = giftTax + penaltyTax + acquisitionTax + localEducationTax;
 
         // 결과 표시
