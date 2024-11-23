@@ -13,69 +13,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 과거 증여 금액 추가 버튼
+    document.getElementById('addGiftButton').addEventListener('click', () => {
+        const container = document.getElementById('pastGiftsContainer');
+
+        // 새 입력 필드 생성
+        const newInput = document.createElement('input');
+        newInput.type = 'text';
+        newInput.className = 'pastGift';
+        newInput.placeholder = '예: 10,000,000';
+
+        // 콤마 처리 이벤트 추가
+        newInput.addEventListener('input', (e) => {
+            const value = parseNumber(e.target.value);
+            e.target.value = formatNumber(value);
+        });
+
+        container.appendChild(newInput);
+    });
+
     // 계산 버튼 클릭
     document.getElementById('calculateButton').addEventListener('click', () => {
         const giftAmount = parseNumber(document.getElementById('giftAmount').value);
-        const relationship = document.getElementById('relationship').value;
-        const assetType = document.getElementById('assetType').value;
+        const marketPrice = parseNumber(document.getElementById('marketPrice').value);
+        const publicPrice = parseNumber(document.getElementById('publicPrice').value);
         const giftDate = new Date(document.getElementById('giftDate').value);
         const reportDate = new Date(document.getElementById('reportDate').value);
         const reportPeriod = document.getElementById('reportPeriod').value;
 
-        // 공제 금액 설정
-        let exemption = 0;
-        if (relationship === '배우자') exemption = 600000000;
-        else if (relationship === '직계비속') exemption = 50000000;
-        else if (relationship === '미성년자') exemption = 20000000;
-        else if (relationship === '사위/며느리') exemption = 50000000;
-        else exemption = 10000000; // 기타
-
-        // 과세 표준 계산
+        // 과거 증여 금액 합산
         const pastGifts = Array.from(document.querySelectorAll('.pastGift'))
             .map(input => parseNumber(input.value))
             .reduce((sum, val) => sum + val, 0);
+
+        // 감정평가 기준에 따라 과세 표준 결정
+        const taxableBase = Math.max(marketPrice, publicPrice);
+
+        // 총 증여 금액 계산
         const totalGift = giftAmount + pastGifts;
-        const taxableBase = totalGift - exemption;
 
-        // 증여세율에 따른 계산
-        let giftTax = 0;
-        if (taxableBase > 0) {
-            if (taxableBase <= 100000000) giftTax = taxableBase * 0.1;
-            else if (taxableBase <= 500000000) giftTax = taxableBase * 0.2 - 10000000;
-            else if (taxableBase <= 1000000000) giftTax = taxableBase * 0.3 - 60000000;
-            else if (taxableBase <= 3000000000) giftTax = taxableBase * 0.4 - 160000000;
-            else giftTax = taxableBase * 0.5 - 460000000;
-        }
-
-        // 신고 기한 계산
+        // 신고 기한에 따른 초과 계산
         const allowedMonths = reportPeriod === '연장' ? 6 : 3;
-        const actualMonths = Math.ceil((reportDate - giftDate) / (1000 * 60 * 60 * 24 * 30));
-        const overdueMonths = actualMonths - allowedMonths > 0 ? actualMonths - allowedMonths : 0;
+        const delayInMonths = Math.ceil((reportDate - giftDate) / (1000 * 60 * 60 * 24 * 30));
+        const overdueMonths = Math.max(0, delayInMonths - allowedMonths);
 
-        let lateFee = 0;
-        if (overdueMonths > 0) {
-            lateFee = giftTax * 0.003 * overdueMonths; // 가산세: 초과 월당 0.3%
-        }
+        // 가산세 계산 (지연 시 매월 0.3%)
+        const lateFee = overdueMonths > 0 ? totalGift * 0.003 * overdueMonths : 0;
 
-        // 취득세 계산
+        // 취득세 및 부가세 계산 (부동산일 경우만)
+        const assetType = document.getElementById('assetType').value;
         let acquisitionTax = 0;
+        let additionalTax = 0;
+        let educationTax = 0;
         if (assetType === '부동산') {
-            acquisitionTax = totalGift * 0.03; // 부동산 취득세: 3%
+            acquisitionTax = giftAmount * 0.03; // 취득세 3%
+            additionalTax = acquisitionTax * 0.1; // 부가세 10%
+            educationTax = acquisitionTax * 0.2; // 지방교육세 20%
         }
-
-        // 지방교육세 계산
-        const localEducationTax = acquisitionTax * 0.1; // 지방교육세: 취득세의 10%
 
         // 결과 출력
         document.getElementById('result').innerHTML = `
-            총 증여 금액: ${formatNumber(totalGift)}원<br>
-            공제 금액: ${formatNumber(exemption)}원<br>
-            과세 표준: ${formatNumber(taxableBase)}원<br>
-            증여세: ${formatNumber(giftTax)}원<br>
-            신고 기한 초과: ${overdueMonths}개월<br>
+            증여세 신고 기한 초과: ${overdueMonths}개월<br>
             가산세: ${formatNumber(lateFee)}원<br>
             취득세: ${formatNumber(acquisitionTax)}원<br>
-            지방교육세: ${formatNumber(localEducationTax)}원
+            부가세: ${formatNumber(additionalTax)}원<br>
+            지방교육세: ${formatNumber(educationTax)}원
         `;
     });
 });
