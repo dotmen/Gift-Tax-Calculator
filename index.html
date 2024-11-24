@@ -1,43 +1,53 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
-  line-height: 1.6;
-}
-h1 {
-  font-size: 24px;
-  color: #333;
-}
-label {
-  font-size: 14px;
-  display: block;
-  margin-bottom: 5px;
-}
-input[type="text"], select, input[type="date"] {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.button {
-  background-color: #007BFF;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-bottom: 10px;
-}
-.button:hover {
-  background-color: #0056b3;
-}
-.hidden {
-  display: none;
-}
-#result {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>증여세 계산기 (2024년 기준)</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>증여세 계산기 (2024년 기준)</h1>
+
+  <form id="giftTaxForm">
+    <label for="valuation">가액 평가 방식</label>
+    <select id="valuation">
+      <option value="cash">현금</option>
+      <option value="appraisal">감정평가액</option>
+      <option value="marketValue">매매사례가액</option>
+      <option value="publicValue">공시가액</option>
+    </select>
+
+    <label for="amount">평가 금액 (₩)</label>
+    <input type="text" id="amount" placeholder="예: 300,000,000">
+
+    <label for="relation">증여자와의 관계</label>
+    <select id="relation">
+      <option value="spouse">배우자</option>
+      <option value="child">직계비속 (성인 자녀)</option>
+      <option value="minor">직계비속 (미성년자)</option>
+      <option value="inLaw">사위/며느리</option>
+      <option value="others">기타</option>
+    </select>
+
+    <label>과거 증여 금액 추가</label>
+    <button type="button" class="button" id="pastGiftButton">과거 증여 금액 추가</button>
+    <div id="pastGiftSection" class="hidden">
+      <label for="pastAmount">과거 증여 금액 (₩)</label>
+      <input type="text" id="pastAmount" placeholder="예: 50,000,000">
+    </div>
+
+    <label for="giftDate">증여일</label>
+    <input type="date" id="giftDate">
+
+    <label for="submissionDate">신고일</label>
+    <input type="date" id="submissionDate">
+
+    <button type="button" class="button" id="calculateButton">계산하기</button>
+  </form>
+
+  <div id="result">여기에 계산 결과가 나타납니다.</div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
