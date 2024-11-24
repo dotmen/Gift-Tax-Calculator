@@ -28,6 +28,8 @@ document.getElementById('calculateButton').addEventListener('click', async () =>
     submissionDate,
   };
 
+  console.log("보내는 데이터:", data); // 데이터 확인용 로그
+
   try {
     const response = await fetch('/calculate', {
       method: 'POST',
@@ -42,12 +44,14 @@ document.getElementById('calculateButton').addEventListener('click', async () =>
     }
 
     const result = await response.json();
+    console.log("서버에서 받은 결과:", result); // 서버 응답 확인용 로그
     document.getElementById('result').innerText = `계산 결과: ${result.totalTax.toLocaleString()} 원`;
   } catch (error) {
+    console.error("계산 중 오류 발생:", error);
     document.getElementById('result').innerText = '계산 중 오류가 발생했습니다.';
-    console.error(error);
   }
 });
 
 function formatNumber(num) {
-  return num.replace(/\B(?=(\d{3})+(?!\d))/g
+  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
