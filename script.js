@@ -4,11 +4,11 @@ document.getElementById('pastGiftButton').addEventListener('click', () => {
 });
 
 document.getElementById('amount').addEventListener('input', (e) => {
-  e.target.value = e.target.value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  e.target.value = formatNumber(e.target.value.replace(/,/g, ""));
 });
 
 document.getElementById('pastAmount').addEventListener('input', (e) => {
-  e.target.value = e.target.value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  e.target.value = formatNumber(e.target.value.replace(/,/g, ""));
 });
 
 document.getElementById('calculateButton').addEventListener('click', async () => {
@@ -48,3 +48,6 @@ document.getElementById('calculateButton').addEventListener('click', async () =>
     console.error(error);
   }
 });
+
+function formatNumber(num) {
+  return num.replace(/\B(?=(\d{3})+(?!\d))/g
