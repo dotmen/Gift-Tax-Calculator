@@ -1,18 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const taxBrackets = [
-        { limit: 100000000, rate: 10, deduction: 0 },
-        { limit: 500000000, rate: 20, deduction: 10000000 },
-        { limit: 1000000000, rate: 30, deduction: 60000000 },
-        { limit: 3000000000, rate: 40, deduction: 160000000 },
-        { limit: Infinity, rate: 50, deduction: 460000000 }
-    ];
-
-    // 숫자에 콤마 추가
+    // 콤마 추가 함수
     function formatNumberWithCommas(number) {
         return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
 
-    // 콤마 제거
+    // 콤마 제거 함수
     function removeCommas(value) {
         return value.replace(/,/g, '');
     }
@@ -68,6 +60,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const reportDate = document.getElementById('reportDate').value;
 
         const taxableAmount = Math.max(giftAmount + previousGifts - exemption, 0);
+
+        // 증여세 계산 로직
+        const taxBrackets = [
+            { limit: 100000000, rate: 10, deduction: 0 },
+            { limit: 500000000, rate: 20, deduction: 10000000 },
+            { limit: 1000000000, rate: 30, deduction: 60000000 },
+            { limit: 3000000000, rate: 40, deduction: 160000000 },
+            { limit: Infinity, rate: 50, deduction: 460000000 }
+        ];
 
         let tax = 0;
         for (let i = 0; i < taxBrackets.length; i++) {
