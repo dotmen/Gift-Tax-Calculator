@@ -1,71 +1,63 @@
-from flask import Flask, render_template, request, jsonify
-from datetime import datetime
+def calculate_gift_tax(gift_amount, exemption_limit, tax_rate):
+    """
+    증여세 계산 함수
 
-app = Flask(__name__)
+    Parameters:
+        gift_amount (int): 증여 금액
+        exemption_limit (int): 공제 한도
+        tax_rate (float): 세율 (%)
 
-# 증여세 계산 함수
-def calculate_gift_tax(data):
+    Returns:
+        int: 최종 증여세액
+    """
+    # 공제 후 과세 표준 계산
+    taxable_amount = max(gift_amount - exemption_limit, 0)
+    
+    # 증여세 계산
+    gift_tax = taxable_amount * (tax_rate / 100)
+    
+    return round(gift_tax)
+
+def get_exemption_limit(relationship):
+    """
+    관계에 따라 공제 한도를 반환하는 함수
+    """
+    if relationship == "1":
+        return 50000000  # 직계비속 (자녀)
+    elif relationship == "2":
+        return 600000000  # 배우자
+    elif relationship == "3":
+        return 10000000  # 기타
+    else:
+        print("잘못된 선택입니다. 기본값 0원이 적용됩니다.")
+        return 0
+
+def main():
+    print("증여세 계산기에 오신 것을 환영합니다!")
+    print("아래에서 증여받는 사람과의 관계를 선택하세요:")
+    print("1. 직계비속(자녀)\n2. 배우자\n3. 기타(친구 등)")
+    
+    # 관계 선택
+    relationship = input("선택 번호를 입력하세요 (1, 2, 3): ")
+    exemption_limit = get_exemption_limit(relationship)
+    
+    # 사용자 입력 받기
     try:
-        # 데이터 가져오기
-        amount = data.get('amount', 0)
-        past_amount = data.get('pastAmount', 0)
-        relation = data.get('relation', 'others')
-        gift_date = datetime.strptime(data.get('giftDate', '2000-01-01'), '%Y-%m-%d')
-        submission_date = datetime.strptime(data.get('submissionDate', '2000-01-01'), '%Y-%m-%d')
+        gift_amount = int(input("\n증여 금액을 입력하세요 (예: 100000000): "))
+        tax_rate = 10  # 기본 세율 (1억 원 이하)
+        
+        # 계산 실행
+        gift_tax = calculate_gift_tax(gift_amount, exemption_limit, tax_rate)
+        
+        # 결과 출력
+        print("\n=== 계산 결과 ===")
+        print(f"증여 금액: {gift_amount:,} 원")
+        print(f"공제 한도: {exemption_limit:,} 원")
+        print(f"공제 후 과세 표준: {max(gift_amount - exemption_limit, 0):,} 원")
+        print(f"최종 증여세액: {gift_tax:,} 원")
+    except ValueError:
+        print("잘못된 입력입니다. 숫자만 입력하세요.")
 
-        # 기본 증여세율 및 공제액 설정
-        tax_rate = 0.1
-        if relation == "spouse":
-            deduction = 600000000  # 배우자 공제
-        elif relation == "child":
-            deduction = 50000000  # 성인 직계비속 공제
-        elif relation == "minor":
-            deduction = 20000000  # 미성년자 공제
-        elif relation == "inLaw":
-            deduction = 30000000  # 사위/며느리 공제
-        else:
-            deduction = 10000000  # 기타 공제
+if __name__ == "__main__":
+    main()
 
-        # 과세표준 계산
-        taxable_amount = max(0, (amount + past_amount - deduction))
-
-        # 가산세 계산
-        months_late = (submission_date - gift_date).days // 30
-        penalty_rate = 0.0
-        if months_late > 6:
-            penalty_rate = 0.2
-        elif months_late > 3:
-            penalty_rate = 0.1
-
-        # 증여세 계산
-        base_tax = taxable_amount * tax_rate
-        penalty_tax = taxable_amount * penalty_rate
-        total_tax = base_tax + penalty_tax
-
-        return {
-            "taxableAmount": taxable_amount,
-            "baseTax": base_tax,
-            "penaltyTax": penalty_tax,
-            "totalTax": total_tax,
-        }
-    except Exception as e:
-        print("계산 함수 오류:", e)
-        raise
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/calculate', methods=['POST'])
-def calculate():
-    try:
-        data = request.get_json()
-        print("수신된 데이터:", data)
-        result = calculate_gift_tax(data)
-        return jsonify(result)
-    except Exception as e:
-        print("오류 발생:", e)
-        return jsonify({"error": str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True)
