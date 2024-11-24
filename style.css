@@ -1,54 +1,56 @@
-body {
-    font-family: Arial, sans-serif;
-    max-width: 400px;
-    margin: 20px auto;
-    line-height: 1.6;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const togglePastGiftButton = document.getElementById('toggle-past-gift');
+    const pastGiftSection = document.getElementById('past-gift-section');
+    const form = document.getElementById('gift-tax-form');
 
-h1 {
-    text-align: center;
-    font-size: 24px;
-    margin-bottom: 20px;
-}
+    // 과거 증여 금액 입력 필드 토글
+    togglePastGiftButton.addEventListener('click', () => {
+        if (pastGiftSection.style.display === 'none') {
+            pastGiftSection.style.display = 'block';
+            togglePastGiftButton.textContent = '과거 증여 금액 숨기기';
+        } else {
+            pastGiftSection.style.display = 'none';
+            togglePastGiftButton.textContent = '과거 증여 금액 추가';
+        }
+    });
 
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* 입력 필드 간 간격 */
-}
+    // 폼 제출 이벤트 처리
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px; /* 라벨과 입력 필드 간격 */
-}
+        // 입력값 가져오기
+        const valuationMethod = document.getElementById('valuation-method').value;
+        const assetValue = parseFloat(document.getElementById('asset-value').value);
+        const relationship = document.getElementById('relationship').value;
+        const pastGift = parseFloat(document.getElementById('past-gift').value) || 0;
+        const giftDate = document.getElementById('gift-date').value;
+        const reportDate = document.getElementById('report-date').value;
 
-label {
-    font-weight: bold;
-}
+        if (isNaN(assetValue) || assetValue <= 0) {
+            alert("평가 금액을 올바르게 입력하세요.");
+            return;
+        }
 
-input, select, button {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-}
+        // 백엔드에 데이터 전달
+        const response = await fetch('/calculate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                value: assetValue,
+                past_gift: pastGift,
+                relationship,
+                is_minor: relationship === 'minor',
+                gift_date: giftDate,
+                report_date: reportDate
+            })
+        });
 
-button {
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-}
+        const result = await response.json();
 
-button:hover {
-    background-color: #0056b3;
-}
-
-#result {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-}
+        // 결과 표시
+        document.getElementById('gift-tax').textContent = `₩${result.gift_tax.toLocaleString()}`;
+        document.getElementById('penalty').textContent = `₩${result.penalty.toLocaleString()}`;
+        document.getElementById('total-tax').textContent = `₩${result.total_tax.toLocaleString()}`;
+        document.getElementById('result').style.display = 'block';
+    });
+});
