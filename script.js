@@ -1,8 +1,10 @@
+// 과거 증여 금액 추가 버튼 클릭 이벤트
 document.getElementById('pastGiftButton').addEventListener('click', () => {
   const pastGiftSection = document.getElementById('pastGiftSection');
   pastGiftSection.classList.toggle('hidden');
 });
 
+// 입력값에 콤마 추가 (금액 입력 필드)
 document.getElementById('amount').addEventListener('input', (e) => {
   e.target.value = formatNumber(e.target.value.replace(/,/g, ""));
 });
@@ -11,6 +13,7 @@ document.getElementById('pastAmount').addEventListener('input', (e) => {
   e.target.value = formatNumber(e.target.value.replace(/,/g, ""));
 });
 
+// 계산 버튼 클릭 이벤트
 document.getElementById('calculateButton').addEventListener('click', async () => {
   const valuation = document.getElementById('valuation').value;
   const amount = document.getElementById('amount').value.replace(/,/g, "");
@@ -52,6 +55,7 @@ document.getElementById('calculateButton').addEventListener('click', async () =>
   }
 });
 
+// 숫자에 콤마 추가하는 함수
 function formatNumber(num) {
   return num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
