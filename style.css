@@ -14,15 +14,9 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-h2 {
+h1 {
     text-align: center;
     margin-bottom: 20px;
-    font-size: 20px; /* 제목 크기 조정 */
-}
-
-h3 {
-    margin-top: 20px;
-    font-size: 18px;
 }
 
 form label {
@@ -31,8 +25,7 @@ form label {
 }
 
 form input, form select, button {
-    width: 90%; /* 모든 입력 칸 폭 조정 */
-    max-width: 400px;
+    width: calc(100% - 20px);
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
@@ -41,16 +34,14 @@ form input, form select, button {
 }
 
 button {
-    background-color: #007bff; /* 파란색으로 변경 */
+    background-color: #28a745;
     color: #fff;
     cursor: pointer;
     border: none;
-    padding: 10px;
-    font-size: 14px;
 }
 
 button:hover {
-    background-color: #0056b3; /* 진한 파란색으로 변경 */
+    background-color: #218838;
 }
 
 .info-text {
@@ -62,11 +53,4 @@ button:hover {
 
 .hidden {
     display: none;
-}
-
-.result-info {
-    font-size: 12px;
-    color: #6c757d;
-    text-align: center;
-    margin-top: 20px;
 }
