@@ -21,16 +21,18 @@ body {
 .calculator h1 {
     font-size: 24px;
     margin-bottom: 20px;
+    color: #333;
 }
 
-.calculator label {
+label {
     display: block;
     margin-bottom: 5px;
     text-align: left;
     font-weight: bold;
+    color: #333;
 }
 
-.calculator input, .calculator select, .calculator button {
+input, select, button {
     width: calc(100% - 20px);
     padding: 10px;
     margin-bottom: 15px;
@@ -39,16 +41,22 @@ body {
     box-sizing: border-box;
 }
 
-.calculator button {
+button {
     background-color: #4CAF50;
     color: white;
     font-weight: bold;
     border: none;
     cursor: pointer;
+    padding: 10px 0;
 }
 
-.calculator button:hover {
+button:hover {
     background-color: #45a049;
+}
+
+.btn-green {
+    background-color: #4CAF50;
+    color: white;
 }
 
 #result {
