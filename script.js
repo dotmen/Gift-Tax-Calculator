@@ -19,6 +19,11 @@ document.getElementById('assetType').addEventListener('change', function () {
     document.getElementById(selectedInput).classList.remove('hidden');
 });
 
+// 현금 금액 입력란에 쉼표 추가
+document.getElementById('cashAmount').addEventListener('input', function () {
+    formatNumber(this);
+});
+
 // 과거 증여 금액 추가
 document.getElementById('addPastGift').addEventListener('click', function () {
     const input = document.createElement('input');
@@ -43,7 +48,6 @@ document.getElementById('calculate').addEventListener('click', function () {
     const relationship = document.getElementById('relationship').value;
     const giftDate = new Date(document.getElementById('giftDate').value);
     const reportDate = new Date(document.getElementById('reportDate').value);
-    const reportDeadline = parseInt(document.getElementById('reportDeadline').value, 10); // 3 or 6 months
     const pastGifts = Array.from(document.querySelectorAll('.past-gift-input'))
         .map(input => parseInput(input.value))
         .reduce((sum, val) => sum + val, 0);
@@ -69,18 +73,29 @@ document.getElementById('calculate').addEventListener('click', function () {
     // 가산세 계산
     let penaltyTax = 0;
     if (reportDate > giftDate) {
-        const timeDiff = Math.ceil((reportDate - giftDate) / (1000 * 60 * 60 * 24)); // Days difference
-        if (timeDiff > reportDeadline * 30 && timeDiff <= (reportDeadline + 3) * 30) {
+        const timeDiff = Math.ceil((reportDate - giftDate) / (1000 * 60 * 60 * 24));
+        if (timeDiff > 90 && timeDiff <= 180) {
             penaltyTax = giftTax * 0.1;
-        } else if (timeDiff > (reportDeadline + 3) * 30) {
+        } else if (timeDiff > 180) {
             penaltyTax = giftTax * 0.2;
         }
     }
 
+    // 취득세 및 지방교육세 계산 (부동산만 해당)
+    let acquisitionTax = 0, localEducationTax = 0;
+    if (assetType === 'realEstate') {
+        acquisitionTax = amount * 0.035; // 취득세율 3.5%
+        localEducationTax = acquisitionTax * 0.1; // 지방교육세 10% of 취득세
+    }
+
     // 최종 세액 계산
-    const totalTax = giftTax + penaltyTax;
+    const totalTax = giftTax + penaltyTax + acquisitionTax + localEducationTax;
 
     // 결과 표시
     document.getElementById('giftTax').textContent = giftTax.toLocaleString();
     document.getElementById('penaltyTax').textContent = penaltyTax.toLocaleString();
-    document.getElementById('totalTax').textContent = totalTax.toLocale
+    document.getElementById('acquisitionTax').textContent = acquisitionTax.toLocaleString();
+    document.getElementById('localEducationTax').textContent = localEducationTax.toLocaleString();
+    document.getElementById('totalTax').textContent = totalTax.toLocaleString();
+    document.getElementById('results').classList.remove('hidden');
+});
