@@ -21,18 +21,18 @@ body {
 .calculator h1 {
     font-size: 24px;
     margin-bottom: 20px;
-    color: #333;
 }
 
-label {
+.calculator label {
     display: block;
     margin-bottom: 5px;
     text-align: left;
     font-weight: bold;
-    color: #333;
 }
 
-input, select, button {
+.calculator input,
+.calculator select,
+.calculator button {
     width: calc(100% - 20px);
     padding: 10px;
     margin-bottom: 15px;
@@ -41,22 +41,16 @@ input, select, button {
     box-sizing: border-box;
 }
 
-button {
+.calculator button {
     background-color: #4CAF50;
     color: white;
     font-weight: bold;
     border: none;
     cursor: pointer;
-    padding: 10px 0;
 }
 
-button:hover {
+.calculator button:hover {
     background-color: #45a049;
-}
-
-.btn-green {
-    background-color: #4CAF50;
-    color: white;
 }
 
 #result {
@@ -64,4 +58,8 @@ button:hover {
     color: #333;
     margin-top: 20px;
     text-align: left;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #ddd;
 }
