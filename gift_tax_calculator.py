@@ -6,7 +6,7 @@ app = Flask(__name__)
 # 증여세 계산 함수
 def calculate_gift_tax(data):
     try:
-        # 데이터 가져오기 및 기본값 설정
+        # 데이터 가져오기
         amount = data.get('amount', 0)
         past_amount = data.get('pastAmount', 0)
         relation = data.get('relation', 'others')
