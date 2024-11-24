@@ -5,10 +5,22 @@ body {
     line-height: 1.6;
 }
 
+h1 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
 form {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* 입력 필드 간 간격 */
+    gap: 20px; /* 입력 필드 간 간격 */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* 라벨과 입력 필드 간격 */
 }
 
 label {
@@ -19,6 +31,7 @@ input, select, button {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 16px;
 }
 
 button {
@@ -38,12 +51,4 @@ button:hover {
     padding: 15px;
     border: 1px solid #ccc;
     background-color: #f9f9f9;
-}
-
-#past-gift-section {
-    margin-top: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    background-color: #f1f1f1;
-    border-radius: 5px;
 }
