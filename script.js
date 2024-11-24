@@ -37,8 +37,8 @@ function calculateLatePenalty(submissionDate, giftDate, giftTax) {
     const diffInTime = submissionDateObj - giftDateObj;
     const diffInDays = diffInTime / (1000 * 3600 * 24);
 
-    if (diffInDays <= 0) return 0; // 신고 기한 초과 없음
-    if (diffInDays <= 90) return giftTax * 0.1; // 3개월 초과
+    if (diffInDays <= 90) return 0; // 신고 기한 내
+    if (diffInDays <= 180) return giftTax * 0.1; // 3개월 초과, 6개월 이내
     return giftTax * 0.2; // 6개월 초과
 }
 
@@ -108,7 +108,13 @@ document.getElementById('taxForm').onsubmit = function (e) {
     }
 
     // 과세 표준 계산
-    const exemptionLimit = 50000000; // 기본 공제
+    const exemptionLimit = {
+        child: 50000000,
+        spouse: 600000000,
+        inLaw: 50000000,
+        other: 10000000
+    }[document.getElementById('relationship').value] || 0;
+
     const taxableAmount = Math.max(giftAmount - exemptionLimit, 0);
 
     // 증여세 계산
