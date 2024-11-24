@@ -7,36 +7,58 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>증여세 계산기</h1>
+    <h1>증여세 계산기 (2024년 기준)</h1>
     <form id="gift-tax-form">
-        <label>이번 증여 금액 (₩):</label>
-        <input type="number" id="current-gift" required>
+        <!-- 가액 평가 방식 -->
+        <label>가액 평가 방식:</label>
+        <select id="valuation-method">
+            <option value="cash">현금</option>
+            <option value="appraisal">감정평가액</option>
+            <option value="market_case">매매사례가액</option>
+            <option value="public_price">공시가액</option>
+        </select>
 
-        <label>과거 증여 금액 (₩):</label>
-        <input type="number" id="past-gift" required>
+        <!-- 평가 금액 입력 -->
+        <label>평가 금액 (₩):</label>
+        <input type="number" id="asset-value" placeholder="예: 50,000,000" required>
 
+        <!-- 관계 선택 -->
         <label>증여자와의 관계:</label>
         <select id="relationship">
-            <option value="child">자녀</option>
+            <option value="child">직계비속 (성인 자녀)</option>
+            <option value="minor">직계비속 (미성년 자녀)</option>
             <option value="spouse">배우자</option>
             <option value="in_law">사위/며느리</option>
             <option value="other_relative">기타 친족</option>
             <option value="others">기타</option>
         </select>
 
+        <!-- 과거 증여 금액 -->
+        <button type="button" id="toggle-past-gift">과거 증여 금액 추가</button>
+        <div id="past-gift-section" style="display: none;">
+            <label>과거 증여 금액 (₩):</label>
+            <input type="number" id="past-gift" placeholder="예: 10,000,000">
+        </div>
+
+        <!-- 증여일 -->
         <label>증여일:</label>
         <input type="date" id="gift-date" required>
 
+        <!-- 신고일 -->
         <label>신고일:</label>
         <input type="date" id="report-date" required>
 
-        <label>가산세 계산 포함:</label>
-        <input type="checkbox" id="include-penalty">
-
+        <!-- 계산 버튼 -->
         <button type="submit">계산하기</button>
     </form>
 
-    <div id="results"></div>
+    <!-- 결과 표시 -->
+    <div id="result" style="display: none;">
+        <h3>계산 결과</h3>
+        <p>증여세: <span id="gift-tax"></span></p>
+        <p>가산세: <span id="penalty"></span></p>
+        <p>총 세금: <span id="total-tax"></span></p>
+    </div>
 
     <script src="script.js"></script>
 </body>
