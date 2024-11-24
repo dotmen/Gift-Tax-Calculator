@@ -1,79 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>증여세 계산기</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <h1>증여세 계산기 (2024년 기준)</h1>
-    <form id="gift-tax-form">
-        <!-- 가액 평가 방식 -->
-        <div class="form-group">
-            <label for="valuation-method">가액 평가 방식:</label>
-            <select id="valuation-method">
-                <option value="cash">현금</option>
-                <option value="appraisal">감정평가액</option>
-                <option value="market_case">매매사례가액</option>
-                <option value="public_price">공시가액</option>
-            </select>
-        </div>
+from flask import Flask, render_template, request, jsonify
+from datetime import datetime
 
-        <!-- 평가 금액 입력 -->
-        <div class="form-group">
-            <label for="asset-value">평가 금액 (₩):</label>
-            <input type="text" id="asset-value" placeholder="예: 50,000,000" required>
-        </div>
+app = Flask(__name__)
 
-        <!-- 관계 선택 -->
-        <div class="form-group">
-            <label for="relationship">증여자와의 관계:</label>
-            <select id="relationship">
-                <option value="child">직계비속 (성인 자녀)</option>
-                <option value="minor">직계비속 (미성년 자녀)</option>
-                <option value="spouse">배우자</option>
-                <option value="in_law">사위/며느리</option>
-                <option value="other_relative">기타 친족</option>
-                <option value="others">기타</option>
-            </select>
-        </div>
+# 증여세 계산 함수
+def calculate_gift_tax(data):
+    amount = data['amount']
+    past_amount = data['pastAmount']
+    relation = data['relation']
+    gift_date = datetime.strptime(data['giftDate'], '%Y-%m-%d')
+    submission_date = datetime.strptime(data['submissionDate'], '%Y-%m-%d')
 
-        <!-- 과거 증여 금액 -->
-        <div class="form-group">
-            <button type="button" id="toggle-past-gift">과거 증여 금액 추가</button>
-            <div id="past-gift-section" style="display: none; margin-top: 10px;">
-                <label for="past-gift">과거 증여 금액 (₩):</label>
-                <input type="text" id="past-gift" placeholder="예: 10,000,000">
-            </div>
-        </div>
+    # 기본 증여세율
+    tax_rate = 0.1
+    if relation == "spouse":
+        deduction = 600000000  # 배우자 공제
+    elif relation == "child":
+        deduction = 50000000  # 성인 직계비속 공제
+    elif relation == "minor":
+        deduction = 20000000  # 미성년자 공제
+    elif relation == "inLaw":
+        deduction = 30000000  # 사위/며느리 공제
+    else:
+        deduction = 10000000  # 기타 공제
 
-        <!-- 증여일 -->
-        <div class="form-group">
-            <label for="gift-date">증여일:</label>
-            <input type="date" id="gift-date" required>
-        </div>
+    # 과세표준 계산
+    taxable_amount = max(0, (amount + past_amount - deduction))
 
-        <!-- 신고일 -->
-        <div class="form-group">
-            <label for="report-date">신고일:</label>
-            <input type="date" id="report-date" required>
-        </div>
+    # 가산세 계산
+    months_late = (submission_date - gift_date).days // 30
+    penalty_rate = 0.0
+    if months_late > 6:
+        penalty_rate = 0.2
+    elif months_late > 3:
+        penalty_rate = 0.1
 
-        <!-- 계산 버튼 -->
-        <div class="form-group">
-            <button type="submit">계산하기</button>
-        </div>
-    </form>
+    # 증여세 계산
+    base_tax = taxable_amount * tax_rate
+    penalty_tax = taxable_amount * penalty_rate
+    total_tax = base_tax + penalty_tax
 
-    <!-- 결과 표시 -->
-    <div id="result" style="display: none;">
-        <h3>계산 결과</h3>
-        <p>증여세: <span id="gift-tax"></span></p>
-        <p>가산세: <span id="penalty"></span></p>
-        <p>총 세금: <span id="total-tax"></span></p>
-    </div>
+    return {
+        "taxableAmount": taxable_amount,
+        "baseTax": base_tax,
+        "penaltyTax": penalty_tax,
+        "totalTax": total_tax,
+    }
 
-    <script src="script.js"></script>
-</body>
-</html>
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    try:
+        data = request.get_json()
+        result = calculate_gift_tax(data)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
