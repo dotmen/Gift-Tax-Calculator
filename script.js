@@ -7,20 +7,11 @@ const taxBrackets = [
     { limit: Infinity, rate: 50, deduction: 460000000 }
 ];
 
-// 가산세 계산
-function calculateLatePenalty(submissionDate, giftDate, giftTax) {
-    const giftDateObj = new Date(giftDate);
-    const submissionDateObj = new Date(submissionDate);
+// 취득세 및 지방세율
+const acquisitionTaxRate = 3.5 / 100; // 취득세율
+const educationTaxRate = 10 / 100; // 지방교육세율
 
-    const diffInTime = submissionDateObj - giftDateObj;
-    const diffInDays = diffInTime / (1000 * 3600 * 24);
-
-    if (diffInDays <= 0) return 0; // 신고 기한 초과 없음
-    if (diffInDays <= 90) return giftTax * 0.1; // 3개월 초과
-    return giftTax * 0.2; // 6개월 초과
-}
-
-// 증여세 계산 로직
+// 증여세 계산 함수
 function calculateGiftTax(taxableAmount) {
     let tax = 0;
     for (let i = 0; i < taxBrackets.length; i++) {
@@ -36,6 +27,30 @@ function calculateGiftTax(taxableAmount) {
         }
     }
     return Math.max(tax, 0);
+}
+
+// 가산세 계산 함수
+function calculateLatePenalty(submissionDate, giftDate, giftTax) {
+    const giftDateObj = new Date(giftDate);
+    const submissionDateObj = new Date(submissionDate);
+
+    const diffInTime = submissionDateObj - giftDateObj;
+    const diffInDays = diffInTime / (1000 * 3600 * 24);
+
+    if (diffInDays <= 0) return 0; // 신고 기한 초과 없음
+    if (diffInDays <= 90) return giftTax * 0.1; // 3개월 초과
+    return giftTax * 0.2; // 6개월 초과
+}
+
+// 취득세 및 지방세 계산 함수
+function calculateLocalTaxes(realEstateValue) {
+    const acquisitionTax = realEstateValue * acquisitionTaxRate;
+    const educationTax = acquisitionTax * educationTaxRate;
+
+    return {
+        acquisitionTax: Math.round(acquisitionTax),
+        educationTax: Math.round(educationTax)
+    };
 }
 
 // 재산 유형에 따라 입력 필드 표시
@@ -104,11 +119,19 @@ document.getElementById('taxForm').onsubmit = function (e) {
     const submissionDate = document.getElementById('submissionDate')?.value;
     const latePenalty = calculateLatePenalty(submissionDate, giftDate, giftTax);
 
+    // 취득세 및 지방세 계산 (부동산만 해당)
+    let localTaxes = { acquisitionTax: 0, educationTax: 0 };
+    if (selectedType === 'realEstate') {
+        localTaxes = calculateLocalTaxes(giftAmount);
+    }
+
     // 결과 표시
     const resultDiv = document.getElementById('result');
     resultDiv.innerHTML = `
         <p><strong>증여세:</strong> ${giftTax.toLocaleString()}원</p>
         <p><strong>가산세:</strong> ${latePenalty.toLocaleString()}원</p>
-        <p><strong>최종 납부세액:</strong> ${(giftTax + latePenalty).toLocaleString()}원</p>
+        <p><strong>취득세:</strong> ${localTaxes.acquisitionTax.toLocaleString()}원</p>
+        <p><strong>지방교육세:</strong> ${localTaxes.educationTax.toLocaleString()}원</p>
+        <p><strong>최종 납부세액:</strong> ${(giftTax + latePenalty + localTaxes.acquisitionTax + localTaxes.educationTax).toLocaleString()}원</p>
     `;
 };
