@@ -6,7 +6,7 @@ app = Flask(__name__)
 # 증여세 계산 함수
 def calculate_gift_tax(data):
     try:
-        # 데이터 가져오기 및 기본값 설정
+        # 데이터 가져오기
         amount = data.get('amount', 0)
         past_amount = data.get('pastAmount', 0)
         relation = data.get('relation', 'others')
@@ -49,7 +49,7 @@ def calculate_gift_tax(data):
             "totalTax": total_tax,
         }
     except Exception as e:
-        print("계산 함수 오류:", e)  # 에러 로그
+        print("계산 함수 오류:", e)
         raise
 
 @app.route('/')
@@ -60,12 +60,11 @@ def index():
 def calculate():
     try:
         data = request.get_json()
-        print("수신된 데이터:", data)  # 디버깅용 로그
+        print("수신된 데이터:", data)
         result = calculate_gift_tax(data)
-        print("계산 결과:", result)  # 디버깅용 로그
         return jsonify(result)
     except Exception as e:
-        print("오류 발생:", e)  # 에러 로그
+        print("오류 발생:", e)
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
