@@ -28,14 +28,46 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // 과거 증여 금액 추가 버튼
+    const addGiftButton = document.getElementById('addGiftButton');
+    addGiftButton.addEventListener('click', function () {
+        const previousGifts = document.getElementById('previousGifts');
+        const inputField = document.createElement('input');
+        inputField.type = 'text';
+        inputField.placeholder = '예: 10,000,000';
+        inputField.className = 'past-gift';
+        inputField.addEventListener('input', function () {
+            const rawValue = removeCommas(this.value);
+            if (!isNaN(rawValue) && rawValue !== '') {
+                this.value = formatNumberWithCommas(rawValue);
+            } else {
+                this.value = ''; // 잘못된 값 초기화
+            }
+        });
+        previousGifts.appendChild(inputField);
+    });
+
+    // 과거 증여 금액 합산
+    function getTotalPreviousGifts() {
+        const inputs = document.querySelectorAll('#previousGifts input');
+        let total = 0;
+        inputs.forEach(input => {
+            total += parseInt(removeCommas(input.value)) || 0;
+        });
+        return total;
+    }
+
     // 증여세 계산
     document.getElementById('taxForm').onsubmit = function (e) {
         e.preventDefault();
 
         const giftAmount = parseInt(removeCommas(giftAmountInput.value)) || 0;
         const exemption = parseInt(document.getElementById('relationship').value) || 0;
+        const previousGifts = getTotalPreviousGifts();
+        const giftDate = document.getElementById('giftDate').value;
+        const reportDate = document.getElementById('reportDate').value;
 
-        const taxableAmount = Math.max(giftAmount - exemption, 0);
+        const taxableAmount = Math.max(giftAmount + previousGifts - exemption, 0);
 
         let tax = 0;
         for (let i = 0; i < taxBrackets.length; i++) {
@@ -60,6 +92,8 @@ document.addEventListener('DOMContentLoaded', function () {
             <p><strong>공제 한도:</strong> ${exemption.toLocaleString()}원</p>
             <p><strong>과세 표준:</strong> ${taxableAmount.toLocaleString()}원</p>
             <p><strong>증여세:</strong> ${tax.toLocaleString()}원</p>
+            <p><strong>증여일:</strong> ${giftDate}</p>
+            <p><strong>신고일:</strong> ${reportDate}</p>
         `;
     };
 });
