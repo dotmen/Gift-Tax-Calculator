@@ -4,17 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>증여세 계산기</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .calculator-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c7d47;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #2c7d47;
+            color: #fff;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #1e5934;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
     <div class="calculator-container">
         <h2>증여세 계산기</h2>
 
         <label for="giftAmount">증여 금액 입력 (원):</label>
-        <input type="text" id="giftAmount" placeholder="금액을 입력하세요">
+        <input type="text" id="giftAmount" placeholder="금액을 입력하세요" oninput="formatNumberWithComma(this)">
 
         <label for="pastGiftAmount">과거 증여 금액 입력 (원):</label>
-        <input type="text" id="pastGiftAmount" placeholder="과거 증여 금액을 입력하세요">
+        <input type="text" id="pastGiftAmount" placeholder="과거 증여 금액을 입력하세요" oninput="formatNumberWithComma(this)">
 
         <label for="relationship">관계 선택:</label>
         <select id="relationship">
@@ -35,7 +89,45 @@
         <div id="result"></div>
     </div>
 
-    <!-- JavaScript 연결 -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        function formatNumberWithComma(input) {
+            let value = input.value.replace(/,/g, "");
+            if (isNaN(value)) {
+                input.value = "";
+                return;
+            }
+            input.value = Number(value).toLocaleString('ko-KR');
+        }
+
+        async function calculateTax() {
+            const giftAmount = document.getElementById("giftAmount").value;
+            const pastGiftAmount = document.getElementById("pastGiftAmount").value;
+            const relationship = document.getElementById("relationship").value;
+            const giftDate = document.getElementById("giftDate").value;
+            const declarationDate = document.getElementById("declarationDate").value;
+
+            const response = await fetch("/calculate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    giftAmount: parseInt(giftAmount.replace(/,/g, ""), 10) || 0,
+                    pastGiftAmount: parseInt(pastGiftAmount.replace(/,/g, ""), 10) || 0,
+                    relationship,
+                    giftDate,
+                    declarationDate,
+                }),
+            });
+
+            const result = await response.json();
+            document.getElementById("result").innerHTML = `
+                <b>결과:</b><br>
+                기본 증여세: ${result.basicTax.toLocaleString()}원<br>
+                가산세: ${result.penaltyTax.toLocaleString()}원<br>
+                총 납부 세액: ${result.totalTax.toLocaleString()}원
+            `;
+        }
+    </script>
 </body>
 </html>
