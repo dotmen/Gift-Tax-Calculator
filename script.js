@@ -7,8 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     togglePastGiftButton.addEventListener('click', () => {
         if (pastGiftSection.style.display === 'none') {
             pastGiftSection.style.display = 'block';
+            togglePastGiftButton.textContent = '과거 증여 금액 숨기기';
         } else {
             pastGiftSection.style.display = 'none';
+            togglePastGiftButton.textContent = '과거 증여 금액 추가';
         }
     });
 
