@@ -1,63 +1,49 @@
 body {
-    font-family: Arial, sans-serif;
-    max-width: 400px;
-    margin: 20px auto;
-    line-height: 1.6;
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  line-height: 1.6;
 }
-
 h1 {
-    text-align: center;
-    font-size: 24px;
-    margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
 }
-
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* 입력 필드 간 간격 */
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
 label {
-    font-weight: bold;
-    margin-bottom: 5px;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 5px;
 }
-
-input, select, button {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
+input[type="text"], select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
-
-button {
-    background-color: #007BFF; /* 파란색 배경 */
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
+.button {
+  background-color: #007BFF;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 10px;
 }
-
-button:hover {
-    background-color: #0056b3;
+.button:hover {
+  background-color: #0056b3;
 }
-
+.hidden {
+  display: none;
+}
+.info {
+  font-size: 12px;
+  color: #666;
+  margin-top: -8px;
+  margin-bottom: 10px;
+}
 #result {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-}
-
-#past-gift-section {
-    margin-top: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    background-color: #f1f1f1;
-    border-radius: 5px;
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
 }
