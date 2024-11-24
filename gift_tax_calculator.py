@@ -1,43 +1,73 @@
-def calculate_gift_tax(gift_amount, exemption_limit, tax_rate):
-    """
-    증여세 계산 함수 (2024년 기준)
-    """
-    taxable_amount = max(gift_amount - exemption_limit, 0)
-    gift_tax = taxable_amount * (tax_rate / 100)
-    return round(gift_tax)
+from flask import Flask, render_template, request, jsonify
+from datetime import datetime
 
-def get_exemption_limit(relationship):
-    """
-    관계에 따라 공제 한도를 반환 (2024년 기준)
-    """
-    if relationship == "1":
-        return 50000000  # 직계비속
-    elif relationship == "2":
-        return 600000000  # 배우자
-    elif relationship == "3":
-        return 10000000  # 기타
-    else:
-        print("잘못된 선택입니다. 기본값 0원이 적용됩니다.")
-        return 0
+app = Flask(__name__)
 
-def main():
-    print("증여세 계산기 (2024년 기준)")
-    print("아래에서 증여받는 사람과의 관계를 선택하세요:")
-    print("1. 직계비속(자녀)\n2. 배우자\n3. 기타(친구 등)")
-    relationship = input("선택 번호를 입력하세요 (1, 2, 3): ")
-    exemption_limit = get_exemption_limit(relationship)
+@app.route("/")
+def index():
+    return render_template("index.html")
 
-    try:
-        gift_amount = int(input("\n증여 금액을 입력하세요 (예: 100000000): "))
-        tax_rate = 10  # 기본 세율
-        gift_tax = calculate_gift_tax(gift_amount, exemption_limit, tax_rate)
-        print("\n=== 계산 결과 ===")
-        print(f"증여 금액: {gift_amount:,} 원")
-        print(f"공제 한도: {exemption_limit:,} 원")
-        print(f"공제 후 과세 표준: {max(gift_amount - exemption_limit, 0):,} 원")
-        print(f"최종 증여세액: {gift_tax:,} 원")
-    except ValueError:
-        print("잘못된 입력입니다. 숫자만 입력하세요.")
+@app.route("/calculate", methods=["POST"])
+def calculate():
+    data = request.get_json()
+    
+    # 입력 값 처리
+    gift_amount = data.get("giftAmount", 0)
+    past_gift_amount = data.get("pastGiftAmount", 0)
+    relationship = data.get("relationship")
+    gift_date = datetime.strptime(data.get("giftDate"), "%Y-%m-%d")
+    declaration_date = datetime.strptime(data.get("declarationDate"), "%Y-%m-%d")
+    
+    # 관계별 공제액
+    exemptions = {
+        "직계비속": 50000000,
+        "직계존속": 50000000,
+        "배우자": 600000000,
+        "며느리": 10000000,
+    }
+    exemption = exemptions.get(relationship, 0)
+
+    # 과거 증여 금액 합산 기준
+    total_gift_amount = gift_amount
+    current_year = datetime.now().year
+    if relationship in ["직계비속", "직계존속"]:
+        if current_year - gift_date.year <= 10:
+            total_gift_amount += past_gift_amount
+    elif relationship == "며느리":
+        if current_year - gift_date.year <= 5:
+            total_gift_amount += past_gift_amount
+
+    # 과세표준 계산
+    taxable_amount = max(0, total_gift_amount - exemption)
+
+    # 누진세율 및 누진공제 적용
+    tax_rate = [
+        (50000000, 0.1, 0),
+        (100000000, 0.2, 5000000),
+        (300000000, 0.3, 15000000),
+        (500000000, 0.4, 45000000),
+        (float('inf'), 0.5, 95000000),
+    ]
+    basic_tax = 0
+    for limit, rate, deduction in tax_rate:
+        if taxable_amount <= limit:
+            basic_tax = taxable_amount * rate - deduction
+            break
+
+    # 신고 기한 계산
+    due_date = gift_date.replace(month=gift_date.month + 3)
+    penalty_tax = 0
+    if declaration_date > due_date:
+        months_late = (declaration_date.year - due_date.year) * 12 + (declaration_date.month - due_date.month)
+        penalty_tax = basic_tax * 0.02 * months_late
+
+    total_tax = basic_tax + penalty_tax
+
+    return jsonify({
+        "basicTax": round(basic_tax),
+        "penaltyTax": round(penalty_tax),
+        "totalTax": round(total_tax)
+    })
 
 if __name__ == "__main__":
-    main()
+    app.run(debug=True)
