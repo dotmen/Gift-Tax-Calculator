@@ -3,16 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>증여세 계산기</title>
+    <title>증여세 계산기 (2024년 기준)</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="calculator">
-        <h1>증여세 계산기</h1>
+        <h1>증여세 계산기 (2024년 기준)</h1>
         <form id="taxForm">
-            <!-- 증여 금액 -->
-            <label for="giftAmount">증여 금액 (원):</label>
-            <input type="text" id="giftAmount" placeholder="예: 10,000,000">
+            <!-- 재산 유형 -->
+            <label for="assetType">재산 유형:</label>
+            <select id="assetType">
+                <option value="cash">현금</option>
+                <option value="realEstate">부동산</option>
+                <option value="stock">주식</option>
+            </select>
 
             <!-- 관계 -->
             <label for="relationship">관계:</label>
