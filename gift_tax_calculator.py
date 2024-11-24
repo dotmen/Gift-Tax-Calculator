@@ -1,6 +1,6 @@
 def calculate_gift_tax(gift_amount, exemption_limit, tax_rate):
     """
-    증여세 계산 함수
+    증여세 계산 함수 (2024년 기준)
 
     Parameters:
         gift_amount (int): 증여 금액
@@ -20,7 +20,7 @@ def calculate_gift_tax(gift_amount, exemption_limit, tax_rate):
 
 def get_exemption_limit(relationship):
     """
-    관계에 따라 공제 한도를 반환하는 함수
+    관계에 따라 공제 한도를 반환하는 함수 (2024년 기준)
     """
     if relationship == "1":
         return 50000000  # 직계비속 (자녀)
@@ -33,7 +33,7 @@ def get_exemption_limit(relationship):
         return 0
 
 def main():
-    print("증여세 계산기에 오신 것을 환영합니다!")
+    print("증여세 계산기 (2024년 기준)")
     print("아래에서 증여받는 사람과의 관계를 선택하세요:")
     print("1. 직계비속(자녀)\n2. 배우자\n3. 기타(친구 등)")
     
@@ -44,7 +44,7 @@ def main():
     # 사용자 입력 받기
     try:
         gift_amount = int(input("\n증여 금액을 입력하세요 (예: 100000000): "))
-        tax_rate = 10  # 기본 세율 (1억 원 이하)
+        tax_rate = 10  # 기본 세율 (1억 원 이하, 2024년 기준)
         
         # 계산 실행
         gift_tax = calculate_gift_tax(gift_amount, exemption_limit, tax_rate)
@@ -52,7 +52,7 @@ def main():
         # 결과 출력
         print("\n=== 계산 결과 ===")
         print(f"증여 금액: {gift_amount:,} 원")
-        print(f"공제 한도: {exemption_limit:,} 원")
+        print(f"공제 한도 (2024년 기준): {exemption_limit:,} 원")
         print(f"공제 후 과세 표준: {max(gift_amount - exemption_limit, 0):,} 원")
         print(f"최종 증여세액: {gift_tax:,} 원")
     except ValueError:
@@ -60,4 +60,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
