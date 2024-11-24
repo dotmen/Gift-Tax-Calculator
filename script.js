@@ -1,3 +1,4 @@
+// 증여세 누진세 계산 로직
 const taxBrackets = [
     { limit: 100000000, rate: 10, deduction: 0 },
     { limit: 500000000, rate: 20, deduction: 10000000 },
@@ -6,11 +7,42 @@ const taxBrackets = [
     { limit: Infinity, rate: 50, deduction: 460000000 }
 ];
 
+// 가산세 계산
+function calculateLatePenalty(submissionDate, giftDate, giftTax) {
+    const giftDateObj = new Date(giftDate);
+    const submissionDateObj = new Date(submissionDate);
+
+    const diffInTime = submissionDateObj - giftDateObj;
+    const diffInDays = diffInTime / (1000 * 3600 * 24);
+
+    if (diffInDays <= 0) return 0; // 신고 기한 초과 없음
+    if (diffInDays <= 90) return giftTax * 0.1; // 3개월 초과
+    return giftTax * 0.2; // 6개월 초과
+}
+
+// 증여세 계산 로직
+function calculateGiftTax(taxableAmount) {
+    let tax = 0;
+    for (let i = 0; i < taxBrackets.length; i++) {
+        const bracket = taxBrackets[i];
+        const prevLimit = taxBrackets[i - 1]?.limit || 0;
+
+        if (taxableAmount > bracket.limit) {
+            tax += (bracket.limit - prevLimit) * (bracket.rate / 100);
+        } else {
+            tax += (taxableAmount - prevLimit) * (bracket.rate / 100);
+            tax -= bracket.deduction;
+            break;
+        }
+    }
+    return Math.max(tax, 0);
+}
+
 // 재산 유형에 따라 입력 필드 표시
 document.getElementById('assetType').addEventListener('change', function () {
     const selectedType = this.value;
     const additionalFields = document.getElementById('additionalFields');
-    additionalFields.innerHTML = ''; // 초기화
+    additionalFields.innerHTML = ''; // 기존 필드 초기화
 
     if (selectedType === 'cash') {
         additionalFields.innerHTML = `
@@ -42,104 +74,41 @@ document.getElementById('addGiftButton').addEventListener('click', function () {
     previousGifts.appendChild(inputField);
 });
 
-// 과거 증여 금액 합산
-function getTotalPreviousGifts() {
-    const inputs = document.querySelectorAll('#previousGifts input');
-    let total = 0;
-    inputs.forEach(input => {
-        total += parseInt(input.value.replace(/,/g, '')) || 0;
-    });
-    return total;
-}
-
-// 취득세와 지방교육세 계산
-function calculateLocalTaxes(realEstateValue) {
-    const acquisitionTaxRate = 3.5 / 100; // 취득세율
-    const educationTaxRate = 10 / 100; // 지방교육세율
-
-    const acquisitionTax = realEstateValue * acquisitionTaxRate;
-    const educationTax = acquisitionTax * educationTaxRate;
-
-    return {
-        acquisitionTax: Math.round(acquisitionTax),
-        educationTax: Math.round(educationTax)
-    };
-}
-
-// 증여세 및 지방세 계산
+// 결과 출력
 document.getElementById('taxForm').onsubmit = function (e) {
     e.preventDefault();
 
-    const assetType = document.getElementById('assetType').value;
-    const relationship = document.getElementById('relationship').value;
-    const exemption = parseInt(relationship) || 0;
-
+    // 재산 유형에 따른 금액 계산
+    const selectedType = document.getElementById('assetType').value;
     let giftAmount = 0;
-    if (assetType === 'cash') {
-        giftAmount = parseInt(document.getElementById('cashAmount').value.replace(/,/g, '')) || 0;
-    } else if (assetType === 'realEstate') {
-        giftAmount = parseInt(document.getElementById('realEstateValue').value.replace(/,/g, '')) || 0;
+
+    if (selectedType === 'cash') {
+        giftAmount = parseInt(document.getElementById('cashAmount')?.value || 0);
+    } else if (selectedType === 'realEstate') {
+        giftAmount = parseInt(document.getElementById('realEstateValue')?.value || 0);
+    } else if (selectedType === 'stock') {
+        const stockQuantity = parseInt(document.getElementById('stockQuantity')?.value || 0);
+        const stockPrice = parseInt(document.getElementById('stockPrice')?.value || 0);
+        giftAmount = stockQuantity * stockPrice;
     }
 
-    const previousGift = getTotalPreviousGifts();
-    const totalTaxable = Math.max(giftAmount + previousGift - exemption, 0);
+    // 과세 표준 계산
+    const exemptionLimit = 50000000; // 기본 공제
+    const taxableAmount = Math.max(giftAmount - exemptionLimit, 0);
 
-    let tax = 0;
-    for (let i = 0; i < taxBrackets.length; i++) {
-        const bracket = taxBrackets[i];
-        const prevLimit = taxBrackets[i - 1]?.limit || 0;
+    // 증여세 계산
+    const giftTax = calculateGiftTax(taxableAmount);
 
-        if (totalTaxable > bracket.limit) {
-            tax += (bracket.limit - prevLimit) * (bracket.rate / 100);
-        } else {
-            tax += (totalTaxable - prevLimit) * (bracket.rate / 100);
-            tax -= bracket.deduction;
-            break;
-        }
-    }
+    // 가산세 계산
+    const giftDate = document.getElementById('giftDate')?.value;
+    const submissionDate = document.getElementById('submissionDate')?.value;
+    const latePenalty = calculateLatePenalty(submissionDate, giftDate, giftTax);
 
-    tax = Math.max(tax, 0);
-
-    // 취득세 및 지방교육세 계산 (부동산만 해당)
-    let localTaxes = { acquisitionTax: 0, educationTax: 0 };
-    if (assetType === 'realEstate') {
-        localTaxes = calculateLocalTaxes(giftAmount);
-    }
-
-    // 결과 출력
+    // 결과 표시
     const resultDiv = document.getElementById('result');
     resultDiv.innerHTML = `
-        <p><strong>증여세:</strong> ${tax.toLocaleString()}원</p>
-        ${assetType === 'realEstate' ? `
-            <p><strong>취득세:</strong> ${localTaxes.acquisitionTax.toLocaleString()}원</p>
-            <p><strong>지방교육세:</strong> ${localTaxes.educationTax.toLocaleString()}원</p>
-            <p><strong>총 지방세:</strong> ${(localTaxes.acquisitionTax + localTaxes.educationTax).toLocaleString()}원</p>
-        ` : ''}
+        <p><strong>증여세:</strong> ${giftTax.toLocaleString()}원</p>
+        <p><strong>가산세:</strong> ${latePenalty.toLocaleString()}원</p>
+        <p><strong>최종 납부세액:</strong> ${(giftTax + latePenalty).toLocaleString()}원</p>
     `;
 };
-
-// 데이터 입력값 유효성 검사
-function validateInputs() {
-    const assetType = document.getElementById('assetType').value;
-    let amountField;
-    if (assetType === 'cash') {
-        amountField = document.getElementById('cashAmount');
-    } else if (assetType === 'realEstate') {
-        amountField = document.getElementById('realEstateValue');
-    }
-
-    // 금액 필드가 비어 있거나 숫자가 아닌 경우 경고 메시지 표시
-    if (amountField && (!amountField.value || isNaN(parseInt(amountField.value.replace(/,/g, ''))))) {
-        alert("올바른 금액을 입력해주세요.");
-        return false;
-    }
-
-    return true;
-}
-
-// 폼 제출 시 데이터 유효성 검사 실행
-document.getElementById('taxForm').addEventListener('submit', function (e) {
-    if (!validateInputs()) {
-        e.preventDefault();
-    }
-});
