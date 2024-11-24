@@ -36,6 +36,11 @@ document.getElementById('calculateButton').addEventListener('click', async () =>
       },
       body: JSON.stringify(data),
     });
+
+    if (!response.ok) {
+      throw new Error("서버 응답 오류");
+    }
+
     const result = await response.json();
     document.getElementById('result').innerText = `계산 결과: ${result.totalTax.toLocaleString()} 원`;
   } catch (error) {
