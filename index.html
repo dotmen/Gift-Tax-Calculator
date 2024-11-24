@@ -66,6 +66,35 @@
         <div class="result" id="result">결과가 여기에 표시됩니다.</div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // 숫자 입력 필드에 자동으로 콤마 추가 기능
+        document.getElementById("giftAmount").addEventListener("input", function (event) {
+            const input = event.target;
+            let value = input.value;
+
+            // 숫자가 아닌 문자는 모두 제거
+            value = value.replace(/[^0-9]/g, "");
+
+            // 천 단위 콤마 추가
+            value = new Intl.NumberFormat().format(value);
+
+            // 업데이트된 값 설정
+            input.value = value;
+        });
+
+        // 신고 기한에 따른 연장 이유 표시/숨김 처리
+        document.getElementById("reportPeriod").addEventListener("change", function (event) {
+            const selectedValue = event.target.value;
+            const extensionReasonContainer = document.getElementById("extensionReasonContainer");
+
+            if (selectedValue === "연장") {
+                extensionReasonContainer.style.display = "block";
+            } else {
+                extensionReasonContainer.style.display = "none";
+            }
+        });
+
+        // 기타 스크립트 추가 가능
+    </script>
 </body>
 </html>
