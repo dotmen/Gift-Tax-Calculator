@@ -19,8 +19,9 @@ body {
 }
 
 .calculator h1 {
-    font-size: 24px;
+    font-size: 22px;
     margin-bottom: 20px;
+    color: #333;
 }
 
 .form-group {
@@ -32,6 +33,7 @@ body {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
+    font-size: 14px;
 }
 
 .form-group input, .form-group select {
