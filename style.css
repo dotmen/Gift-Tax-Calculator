@@ -1,109 +1,58 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
+    background-color: #f4f4f4;
     margin: 0;
     padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
 }
 
-.container {
-    max-width: 600px;
-    margin: 50px auto;
-    background: #fff;
-    padding: 20px;
+.calculator {
+    background: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    padding: 20px;
     text-align: center;
 }
 
-h2 {
-    margin-bottom: 20px;
+.calculator h1 {
     font-size: 24px;
-    font-weight: bold;
-    color: #333;
+    margin-bottom: 20px;
 }
 
-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-form label {
+.calculator label {
     display: block;
-    margin: 10px 0 5px;
-    width: 100%;
+    margin-bottom: 5px;
     text-align: left;
-    color: #555;
+    font-weight: bold;
 }
 
-form input, form select, button {
-    width: 95%;
-    max-width: 400px;
+.calculator input, .calculator select, .calculator button {
+    width: 100%;
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 5px;
-    font-size: 14px;
-    box-sizing: border-box;
 }
 
-form input:focus, form select:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-    outline: none;
-}
-
-button {
-    background-color: #007bff;
-    color: #fff;
-    cursor: pointer;
+.calculator button {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
     border: none;
-    padding: 10px;
-    font-size: 14px;
-    width: 100%;
-    max-width: 400px;
-    transition: background-color 0.3s ease;
+    cursor: pointer;
 }
 
-button:hover {
-    background-color: #0056b3;
+.calculator button:hover {
+    background-color: #45a049;
 }
 
-.info-text {
-    font-size: 12px;
-    color: #6c757d;
-    margin-top: -10px;
-    margin-bottom: 10px;
-}
-
-.hidden {
-    display: none;
-}
-
-#results {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #e9f5ff;
-    border: 1px solid #007bff;
-    border-radius: 5px;
-    text-align: center;
-    font-size: 14px;
+#result {
+    font-size: 16px;
     color: #333;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-    .container {
-        margin: 20px auto;
-        padding: 15px;
-    }
-
-    form input, form select, button {
-        font-size: 12px;
-    }
-
-    h2 {
-        font-size: 20px;
-    }
+    margin-top: 15px;
+    text-align: left;
 }
