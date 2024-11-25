@@ -6,43 +6,67 @@ body {
 }
 
 .container {
-    max-width: 600px; /* 컨테이너 크기 조정 */
+    max-width: 600px;
     margin: 50px auto;
     background: #fff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-h1 {
-    text-align: center;
+h2 {
     margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 form label {
     display: block;
     margin: 10px 0 5px;
+    width: 100%;
+    text-align: left;
+    color: #555;
 }
 
 form input, form select, button {
-    width: 95%; /* 모든 입력 필드와 버튼의 폭을 동일하게 설정 */
-    max-width: 400px; /* 최대 폭을 설정 */
+    width: 95%;
+    max-width: 400px;
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 5px;
     font-size: 14px;
+    box-sizing: border-box;
+}
+
+form input:focus, form select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
 }
 
 button {
-    background-color: #28a745;
+    background-color: #007bff;
     color: #fff;
     cursor: pointer;
     border: none;
+    padding: 10px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 400px;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #218838;
+    background-color: #0056b3;
 }
 
 .info-text {
@@ -54,4 +78,32 @@ button:hover {
 
 .hidden {
     display: none;
+}
+
+#results {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #e9f5ff;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .container {
+        margin: 20px auto;
+        padding: 15px;
+    }
+
+    form input, form select, button {
+        font-size: 12px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
 }
