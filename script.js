@@ -1,61 +1,62 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const formatNumber = (num) => num.toLocaleString('ko-KR');
-    const parseNumber = (str) => parseInt(str.replace(/,/g, ''), 10) || 0;
+// 숫자 입력 필드에 실시간으로 콤마 추가
+function formatNumberWithCommas(number) {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
-    // 금액 입력 시 콤마 처리
-    document.getElementById('giftAmount').addEventListener('input', (e) => {
-        const value = parseNumber(e.target.value);
-        e.target.value = formatNumber(value);
-    });
+function removeCommas(value) {
+    return value.replace(/,/g, "");
+}
 
-    // 신고 기한 선택 시 연장 이유 표시
-    document.getElementById('reportPeriod').addEventListener('change', (e) => {
-        const reasonContainer = document.getElementById('extensionReasonContainer');
-        reasonContainer.style.display = e.target.value === '연장' ? 'block' : 'none';
-    });
-
-    // 과거 증여 금액 추가 버튼
-    document.getElementById('addGiftButton').addEventListener('click', () => {
-        const container = document.getElementById('pastGiftsContainer');
-        container.style.display = 'block';
-
-        const newInput = document.createElement('input');
-        newInput.type = 'text';
-        newInput.className = 'pastGift';
-        newInput.placeholder = '예: 10,000,000';
-        newInput.addEventListener('input', (e) => {
-            const value = parseNumber(e.target.value);
-            e.target.value = formatNumber(value);
-        });
-        container.appendChild(newInput);
-    });
-
-    // 계산 버튼 클릭
-    document.getElementById('calculateButton').addEventListener('click', () => {
-        const giftAmount = parseNumber(document.getElementById('giftAmount').value);
-        const reportPeriod = document.getElementById('reportPeriod').value;
-        const giftDate = new Date(document.getElementById('giftDate').value);
-        const reportDate = new Date(document.getElementById('reportDate').value);
-
-        // 신고 기한 계산
-        const delayInMonths = Math.ceil((reportDate - giftDate) / (1000 * 60 * 60 * 24 * 30));
-
-        // 가산세 계산
-        let lateFee = 0;
-        if (reportPeriod === '연장' && delayInMonths > 3) {
-            lateFee = giftAmount * 0.003 * (delayInMonths - 3); // 연장된 월 수에 따라 0.3% 가산세
-        }
-
-        // 부동산 관련 취득세 계산
-        const acquisitionTax = giftAmount * 0.03; // 부동산 취득세 3%
-        const additionalTax = acquisitionTax * 0.1; // 부가세 10%
-
-        // 결과 출력
-        document.getElementById('result').innerHTML = `
-            증여세 신고 기한 초과: ${formatNumber(delayInMonths)}개월<br>
-            가산세: ${formatNumber(lateFee)}원<br>
-            취득세: ${formatNumber(acquisitionTax)}원<br>
-            부가세: ${formatNumber(additionalTax)}원
-        `;
-    });
+document.getElementById("giftAmount").addEventListener("input", function (e) {
+    const input = e.target;
+    const rawValue = removeCommas(input.value); // 콤마 제거 후 숫자만 남기기
+    if (!isNaN(rawValue) && rawValue !== "") {
+        input.value = formatNumberWithCommas(rawValue); // 다시 콤마 추가
+    } else {
+        input.value = ""; // 잘못된 입력은 공백 처리
+    }
 });
+
+document.getElementById("previousGift").addEventListener("input", function (e) {
+    const input = e.target;
+    const rawValue = removeCommas(input.value); // 콤마 제거 후 숫자만 남기기
+    if (!isNaN(rawValue) && rawValue !== "") {
+        input.value = formatNumberWithCommas(rawValue); // 다시 콤마 추가
+    } else {
+        input.value = ""; // 잘못된 입력은 공백 처리
+    }
+});
+
+document.getElementById('taxForm').onsubmit = function (e) {
+    e.preventDefault();
+
+    const giftAmount = parseInt(removeCommas(document.getElementById('giftAmount').value)) || 0;
+    const exemptionLimit = parseInt(document.getElementById('relationship').value) || 0;
+    const previousGift = parseInt(removeCommas(document.getElementById('previousGift').value)) || 0;
+
+    const totalTaxable = Math.max(giftAmount + previousGift - exemptionLimit, 0);
+    const taxBrackets = [
+        { limit: 100000000, rate: 0.1, deduction: 0 },
+        { limit: 500000000, rate: 0.2, deduction: 10000000 },
+        { limit: 1000000000, rate: 0.3, deduction: 60000000 },
+        { limit: 3000000000, rate: 0.4, deduction: 160000000 },
+        { limit: Infinity, rate: 0.5, deduction: 460000000 }
+    ];
+
+    let tax = 0;
+    for (let bracket of taxBrackets) {
+        if (totalTaxable > bracket.limit) {
+            tax += (bracket.limit - (taxBrackets[taxBrackets.indexOf(bracket) - 1]?.limit || 0)) * bracket.rate;
+        } else {
+            tax += (totalTaxable - (taxBrackets[taxBrackets.indexOf(bracket) - 1]?.limit || 0)) * bracket.rate;
+            tax -= bracket.deduction;
+            break;
+        }
+    }
+
+    document.getElementById('result').innerHTML = `
+        증여세: ${Math.max(tax, 0).toLocaleString()}원<br>
+        가산세: ${(tax * 0.2).toLocaleString()}원<br>
+        최종 납부세액: ${(Math.max(tax, 0) + tax * 0.2).toLocaleString()}원
+    `;
+};
